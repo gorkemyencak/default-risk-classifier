@@ -22,8 +22,14 @@ DATA_DIR = PROJECT_ROOT / 'data'
 RAW_DATA_DIR = DATA_DIR / 'raw'
 PROCESSED_DATA_DIR = DATA_DIR / 'processed'
 
+REPORTS_DIR = PROJECT_ROOT / 'reports'
+FIGURES_DIR = REPORTS_DIR / 'figures'
+METRICS_DIR = REPORTS_DIR / 'metrics'
+
 SUPERVISED_DATA_PATH = RAW_DATA_DIR / 'supervised_data.xlsx'
 UNSUPERVISED_DATA_PATH = RAW_DATA_DIR / 'unsupervised_data.xlsx'
 
 SUPERVISED_PROCESSED_DATA_PATH = PROCESSED_DATA_DIR / 'supervised_features.csv'
 UNSUPERVISED_PROCESSED_DATA_PATH = PROCESSED_DATA_DIR / 'unsupervised_features.csv'
+
+TARGET_COLUMN = 'Target'
