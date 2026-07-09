@@ -5,6 +5,20 @@ import matplotlib.pyplot as plt
 
 from pathlib import Path
 
+def compare_supervised_vs_unsupervised_columns(
+        supervised_df: pd.DataFrame,
+        unsupervised_df: pd.DataFrame
+) -> dict:
+    """ Return column structure of supervised and unsupervised datasets """
+    supervised_cols = set(supervised_df.columns)
+    unsupervised_cols = set(unsupervised_df.columns)
+
+    return {
+        'columns_only_in_supervised_dataset': sorted(supervised_cols - unsupervised_cols),
+        'columns_only_in_unsupervised_dataset': sorted(unsupervised_cols - supervised_cols),
+        'common_columns': sorted(supervised_cols | unsupervised_cols)
+    }
+
 def get_dataframe_overview(df: pd.DataFrame) -> pd.DataFrame:
     """ Return high-level information for each column """
     df_overview = pd.DataFrame({
@@ -85,3 +99,115 @@ def get_target_summary(
     )
 
     return target_summary
+
+def get_numeric_summary(df: pd.DataFrame) -> pd.DataFrame:
+    """ Return descriptive statistics for numeric columns """
+    df_numeric = df.select_dtypes(
+        include = [
+            'int64',
+            'float64'
+        ]
+    )
+
+    if df_numeric.empty:
+        return pd.DataFrame()
+    
+    return df_numeric.describe(
+        percentiles = [
+            0.01,
+            0.05,
+            0.25,
+            0.50,
+            0.75,
+            0.95,
+            0.99
+        ]
+    ).T
+
+def get_negative_numeric_summary(df: pd.DataFrame) -> pd.DataFrame:
+    """ 
+    Return negative values in numeric columns 
+    
+    If non-negative numeric column, then exclude them from the summary report
+    """
+    df_numeric = df.select_dtypes(
+        include = [
+            'int64',
+            'float64'
+        ]
+    )
+
+    negative_summary = []
+    
+    for col in df_numeric.columns:
+        negative_count = int((df_numeric[col] < 0).sum())
+        negative_rate = negative_count / df.shape[0]
+
+        if negative_count > 0:
+
+            negative_summary.append({
+                'column': col,
+                'negative_count': negative_count,
+                'negative_rate': negative_rate,
+                'min_value': df_numeric[col].min()
+            })
+    
+    return pd.DataFrame(negative_summary).sort_values(
+        'negative_count',
+        ascending = False
+    ) if negative_summary else pd.DataFrame()
+
+
+def get_categorical_summary(
+        df: pd.DataFrame,
+        top_n: int = 10
+) -> pd.DataFrame:
+    """ Return count and ratio for categorical columns with top_n categorical values """
+    categorical_cols = df.select_dtypes(
+        exclude = [
+            'int64',
+            'float64'
+        ]
+    ).columns
+
+    categorical_summaries: list[pd.DataFrame] = []
+
+    for col in categorical_cols:
+        row = (
+            df[col]
+            .value_counts(dropna = False)
+            .head(top_n)
+            .reset_index()
+        )
+
+        row.columns = ['value', 'count']
+        row.insert(
+            0,
+            'column',
+            str(col)
+        )
+        row['ratio'] = (
+            row['count'] 
+            / df.shape[0]
+        ).round(4)
+
+        categorical_summaries.append(row)
+    
+    if not categorical_summaries:
+        return pd.DataFrame(
+            columns = [
+                'column',
+                'value',
+                'count',
+                'ratio'
+            ]
+        )
+
+    return pd.concat(
+        categorical_summaries, 
+        ignore_index = True
+    )
+
+
+
+
