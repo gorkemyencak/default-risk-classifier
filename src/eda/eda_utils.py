@@ -208,6 +208,478 @@ def get_categorical_summary(
         ignore_index = True
     )
 
+def get_default_rate_by_category(
+        df: pd.DataFrame,
+        target_column: str,
+        max_n: int = 10
+) -> pd.DataFrame:
+    """ Return default rate by category for all low-cardinality categorical features """
+    categorical_cols = (
+        df
+        .select_dtypes(
+            exclude = [
+                'int64',
+                'float64'
+            ]
+        )
+        .columns
+        .drop(target_column, errors = 'ignore')
+    )
+
+    results: list[pd.DataFrame] = []
+
+    for col in categorical_cols:
+        
+        if df[col].nunique(dropna = True) <= max_n:
+
+            res = (
+                df
+                .groupby(col, dropna = False)
+                .agg(
+                    customer_count = (target_column, 'size'),
+                    default_count = (target_column, 'sum'),
+                    default_rate = (target_column, 'mean')
+                )
+                .assign(
+                    default_rate_percentage = lambda x: 100 * x['default_rate']
+                )
+                .reset_index()
+                .rename(
+                    columns = {
+                        col: 'category_value'
+                    }
+                )
+            )
+
+            res.insert(
+                0,
+                'feature',
+                col
+            )
+
+            res['default_rate'] = res['default_rate'].round(4)
+            res['default_rate_percentage'] = res['default_rate_percentage'].round(2)
+
+            results.append(res)
+    
+    return (
+        pd.concat(results, ignore_index = True)
+        .sort_values(
+            by = ['feature', 'default_rate'],
+            ascending = [True, False]
+        )
+        .reset_index(drop = True)
+    ) if results else pd.DataFrame()
+
+def get_default_rate_by_numeric_bin(
+        df: pd.DataFrame,
+        target_column: str,
+        n_bins: int = 5,
+        strategy: str = 'quantile'
+) -> pd.DataFrame:
+    """ Return default rate by numetic bins for all numeric features """
+    # sanity check
+    if strategy not in ['uniform', 'quantile']:
+        raise ValueError(f'Provided {strategy} is not a valid strategy. Please choose either uniform or quantile for strategy parameter!')
+    
+    # derive numeric columns
+    numeric_cols = (
+        df
+        .select_dtypes(
+            include = [
+                'int64',
+                'float64'
+            ]
+        )
+        .columns
+        .drop(target_column, errors = 'ignore')
+    )
+
+    df_temp = df[[target_column]].copy()
+
+    skipped_cols: list[str] = []
+
+    for col in numeric_cols:
+
+        temp_bin_column = f'{col}_bin'
+
+        series = (
+            df[col]
+            .replace([np.inf, -np.inf], np.nan)
+        )
+
+        valid_series = series.dropna()
+
+        if valid_series.empty:
+            skipped_cols.append(col)
+            continue
+
+        if valid_series.nunique(dropna = True) <= 1:
+            skipped_cols.append(col)
+            continue
+
+        if strategy == 'quantile':
+            df_temp[temp_bin_column] = pd.qcut(
+                df[col],
+                q = n_bins,
+                duplicates = 'drop'
+            )
+        
+        elif strategy == 'uniform':
+            df_temp[temp_bin_column] = pd.cut(
+                series,
+                bins = n_bins,
+                include_lowest = True,
+                duplicates = 'drop'
+            )
+    
+    results = get_default_rate_by_category(
+        df = df_temp,
+        target_column = target_column,
+        max_n = n_bins
+    )
+
+    return results
+
+def get_outlier_summary(
+        df: pd.DataFrame,
+        lower_quantile: float = 0.05,
+        upper_quantile: float = 0.95
+) -> pd.DataFrame:
+    """ Return outlier summary using lower and upper quantiles """
+    # derive numeric dataframe
+    df_numeric = (
+        df
+        .select_dtypes(
+            include = [
+                'int64',
+                'float64'
+            ]
+        )
+    )
+
+    results = []
+
+    for col in df_numeric.columns:
+
+        series = df_numeric[col].dropna()
+
+        if series.empty:
+            continue
+
+        # define lower- and upper-bounds
+        lb = series.quantile(q = lower_quantile)
+        ub = series.quantile(q = upper_quantile)
+
+        outlier_mask = (
+            (series < lb) | (series > ub)
+        )
+        outlier_count = int(outlier_mask.sum())
+
+        results.append({
+            'column': col,
+            'lower_quantile': lower_quantile,
+            'upper_quantile': upper_quantile,
+            'lower_bound': lb,
+            'upper_bound': ub,
+            'outlier_count': outlier_count,
+            'outlier_rate': outlier_count / df_numeric[col].shape[0],
+            'min_value': series.min(),
+            'max_value': series.max()
+        })
+    
+    return pd.DataFrame(results).sort_values(
+        'outlier_rate',
+        ascending = False
+    ).reset_index(drop = True)
+
+def get_highly_correlated_features(
+        df: pd.DataFrame,
+        target_column: str,
+        threshold: float = 0.80
+) -> pd.DataFrame:
+    """ Return highly correlated numeric feature pairs """
+    # derive numeric features excluding the target variable
+    df_numeric_target_excluded = (
+        df
+        .select_dtypes(
+            include = [
+                'int64',
+                'float64'
+            ]
+        )
+        .drop(
+            columns = [target_column],
+            errors = 'ignore'
+        )
+    )
+
+    # correlation matrix in absolute terms
+    corr_matrix = (
+        df_numeric_target_excluded
+        .corr()
+        .abs()
+    )
+
+    # keeping upper triangle to avoid duplicate correlated pairs
+    upper_triangle = corr_matrix.where(
+        np.triu(
+            np.ones(corr_matrix.shape),
+            k = 1
+        ).astype(bool)
+    )
+
+    # correlated pairs based on absolute correlation matrix
+    correlated_pairs = (
+        upper_triangle
+        .stack()
+        .reset_index()
+    )
+
+    correlated_pairs.columns = [
+        'feature_1',
+        'feature_2',
+        'correlation'
+    ]
+
+    # filter correlated pairs rxceeding the threshold for linear dependency, and then sort them in non-increasing order
+    correlated_pairs = (
+        correlated_pairs
+        .query('correlation >= @threshold')
+        .sort_values(
+            'correlation', 
+            ascending = False
+        )
+        .reset_index(drop = True)
+    )
+
+    return correlated_pairs
+
+def get_numeric_target_correlation(
+        df: pd.DataFrame,
+        target_column: str
+) -> pd.DataFrame:
+    """ Return absolute correlation of numeric features with target variable """
+    # sanity checks
+    if target_column not in df.columns:
+        raise ValueError(f'{target_column} not found in the dataset!')
+    
+    if not pd.api.types.is_numeric_dtype(df[target_column]):
+        raise TypeError(f'{target_column} must be numeric!')
+
+    # derive numeric features excluding the target variable
+    numeric_cols_target_excluded = (
+        df
+        .select_dtypes(
+            include = [
+                'int64',
+                'float64'
+            ]
+        )
+        .drop(
+            columns = [target_column],
+            errors = 'ignore'
+        )
+        .columns
+    )
+
+    valid_cols: list[str] = []
+
+    for col in numeric_cols_target_excluded:
+
+        series = df[col].replace([np.inf, -np.inf], np.nan)
+
+        if series.dropna().empty:
+            continue
+
+        if series.nunique(dropna = True) <= 1:
+            continue
+
+        valid_cols.append(col)
+    
+    if not valid_cols:
+        return pd.DataFrame()
+
+    # target correlation
+    target_corr = (
+        df[valid_cols]
+        .replace([np.inf, -np.inf], np.nan)
+        .corrwith(df[target_column])
+        .abs()
+        .sort_values(ascending = False)
+        .reset_index()
+    )
+
+    target_corr.columns = [
+        'feature',
+        'abs_target_correlation'
+    ]
+
+    return target_corr
+
+def get_highly_correlated_features_with_target_contribution(
+        df: pd.DataFrame,
+        target_column: str,
+        threshold: float = 0.80
+) -> pd.DataFrame:
+    """ Return highly correlated feature pairs with target correlation comparison """
+    # highly linearly correlated pairs
+    high_corr_pairs = get_highly_correlated_features(
+        df = df,
+        target_column = target_column,
+        threshold = threshold
+    )
+
+    # target correlation for all feature set
+    target_corr = get_numeric_target_correlation(
+        df = df,
+        target_column = target_column
+    )
+
+    target_corr_dict = target_corr.set_index('feature')['abs_target_correlation']
+
+    # feature with target correlations
+    high_corr_pairs['feature_1_target_corr'] = (
+        high_corr_pairs['feature_1']
+        .map(target_corr_dict)
+    )
+
+    high_corr_pairs['feature_2_target_corr'] = (
+        high_corr_pairs['feature_2']
+        .map(target_corr_dict)
+    )
+
+    high_corr_pairs['suggested_feature_to_drop'] = np.where(
+        high_corr_pairs['feature_1_target_corr'] >= high_corr_pairs['feature_2_target_corr'],
+        high_corr_pairs['feature_2'],
+        high_corr_pairs['feature_1']
+    )
+
+    return high_corr_pairs
+
+# visualizers
+def plot_missing_values(
+        df: pd.DataFrame,
+        top_n: int = 10
+) -> None:
+    """ Plot missing-value rates by column """
+    missing_rate = (
+        df
+        .isna()
+        .mean()
+        .sort_values(ascending = False)
+    )
+
+    missing_rate = missing_rate[missing_rate > 0].head(top_n)
+
+    # sanity check
+    if missing_rate.empty:
+        print(('No missing values found!'))
+        return None
+    
+    plt.figure(figsize = (8, max(4, len(missing_rate) * 0.4)))
+
+    missing_rate.sort_values().plot(kind = 'barh')
+    plt.title('Missing values by column', fontweight = 'bold')
+    plt.xlabel('Missing rate')
+    plt.ylabel('Column')
+    plt.tight_layout()
+    plt.show()
+
+def plot_target_distribution(
+        df: pd.DataFrame,
+        target_column: str
+) -> None:
+    """ Plot target distribution for supervised classification """
+    # sanity check
+    if target_column not in df.columns:
+        raise ValueError(f'{target_column} not found in the dataset!')
+    
+    target_counts = (
+        df[target_column]
+        .value_counts(dropna = False)
+        .sort_index()
+    )
+
+    target_rates = (
+        df[target_column]
+        .value_counts(
+            normalize = True,
+            dropna = False
+        )
+        .sort_index()
+    )
+
+    plt.figure(figsize = (8, 5))
+    target_counts.plot(kind = 'bar')
+    plt.title('Target Distribution', fontweight = 'bold')
+    plt.xlabel(target_column)
+    plt.ylabel('Count')
+    plt.tight_layout()
+
+    for index, value in enumerate(target_counts):
+
+        rate = target_rates.iloc[index]
+        plt.text(
+            index,
+            value,
+            f'{rate:.1%}',
+            ha = 'center',
+            va = 'bottom'
+        )
+    
+    plt.show()
+
+def plot_numeric_boxplots(
+        df: pd.DataFrame,
+        columns: list[str]
+) -> None:
+    """ Plot boxplots for selected numeric columns to detect outliers """
+    # sanity check
+    for col in columns:
+        # sanity checks
+        if col not in df.columns:
+            print(f'Skipping {col}: not found')
+            continue
+
+        if not pd.api.types.is_numeric_dtype(df[col]):
+            print(f'Skipping {col}: not numeric column')
+        
+        plt.figure(figsize = (7, 3))
+        sns.boxplot(x = df[col])
+        plt.title(f'Boxplot of {col}')
+        plt.xlabel(col)
+        plt.tight_layout()
+
+        plt.show()
+    
+def plot_correlation_heatmap(df: pd.DataFrame) -> None:
+    """ Plot correlation heatmap for numetic features """
+    # derive numeric dataframe
+    df_numeric = (
+        df
+        .select_dtypes(
+            include = [
+                'int64',
+                'float64'
+            ]
+        )
+    )
+
+    # Pearson's correlation matrix
+    corr_matrix = df_numeric.corr()
+
+    plt.figure(figsize = (12, 9))
+    sns.heatmap(
+        corr_matrix,
+        cmap = 'coolwarm',
+        center = 0,
+        square = True
+    )
+    plt.title('Correlation heatmap')
+    plt.tight_layout()
+
+    plt.show()
 
 
 
