@@ -25,6 +25,7 @@ PROCESSED_DATA_DIR = DATA_DIR / 'processed'
 REPORTS_DIR = PROJECT_ROOT / 'reports'
 FIGURES_DIR = REPORTS_DIR / 'figures'
 METRICS_DIR = REPORTS_DIR / 'metrics'
+MODELS_DIR = REPORTS_DIR / 'models'
 
 SUPERVISED_DATA_PATH = RAW_DATA_DIR / 'supervised_data.xlsx'
 UNSUPERVISED_DATA_PATH = RAW_DATA_DIR / 'unsupervised_data.xlsx'
