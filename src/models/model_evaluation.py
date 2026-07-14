@@ -23,7 +23,7 @@ class SupervisedEvaluator:
             model,
             model_name: str,
             X_test: pd.DataFrame,
-            y_test: pd.DataFrame,
+            y_test: pd.Series,
             threshold: float = 0.5
     ) -> dict:
         """ Return classification metrics for a binary classifier """        

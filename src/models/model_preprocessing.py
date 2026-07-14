@@ -1,11 +1,14 @@
 import pandas as pd
 import numpy as np
 
+from typing import Any, cast
+
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, RobustScaler, TargetEncoder
+from sklearn.model_selection import StratifiedKFold
 
 class LoanToValueOutlierImputer(BaseEstimator, TransformerMixin):
     """
@@ -264,6 +267,12 @@ class ModelPreprocessingBuilder:
             ]
         )
 
+        target_encoder_cv = StratifiedKFold(
+            n_splits = 5,
+            shuffle = True,
+            random_state = self.random_state
+        )
+
         high_cardinality_pipeline = Pipeline(
             steps = [
                 ('imputer', SimpleImputer(strategy = 'most_frequent')),
@@ -272,9 +281,7 @@ class ModelPreprocessingBuilder:
                     TargetEncoder(
                         target_type = 'binary',
                         smooth = 'auto',
-                        cv = 5,
-                        shuffle = True,
-                        random_state = self.random_state
+                        cv = cast(Any, target_encoder_cv)
                     )
                 )
             ]
