@@ -1,0 +1,169 @@
+model,feature,importance_mean,importance_std,scoring,business_interpretation
+logistic_regression_baseline,FICO Rating,0.08626840018102308,0.002124842091403777,average_precision,Credit bureau quality / creditworthiness signal
+logistic_regression_baseline,Number of Active Accounts,0.08032627512269444,0.00432786524655623,average_precision,Requires manual business review
+logistic_regression_baseline,Number of Overdue Accounts,0.0491273560067067,0.0032674434414923645,average_precision,Historical repayment stress / delinquency signal
+logistic_regression_baseline,FICO Score,0.04413179442078954,0.0023657371552752984,average_precision,Credit bureau quality / creditworthiness signal
+logistic_regression_baseline,FICO Rating Ordinal,0.03408878611266647,0.003605510098638127,average_precision,Credit bureau quality / creditworthiness signal
+logistic_regression_baseline,Average Account Age,0.02492384716872569,0.0013693314495016962,average_precision,Customer maturity / lifecycle signal
+logistic_regression_baseline,OverdueAccountRatio,0.011337316185067415,0.001657983538816416,average_precision,Historical repayment stress / delinquency signal
+logistic_regression_baseline,HasZeroCurrentBalance,0.009556137489923422,0.0020693416331096807,average_precision,Outstanding balance / leverage signal
+logistic_regression_baseline,Number of Accounts Opened Last 6 Months,0.00913416121865913,0.0020698190106371727,average_precision,Requires manual business review
+logistic_regression_baseline,HasNoActiveAccounts,0.008044900999221005,0.0017888796835203067,average_precision,Requires manual business review
+logistic_regression_baseline,Current Balance Amount,0.007469172489807696,0.0014335454254304004,average_precision,Outstanding balance / leverage signal
+logistic_regression_baseline,CreditHistoryAgeBand,0.0050112717760871115,0.0016217733894385803,average_precision,Customer maturity / lifecycle signal
+logistic_regression_baseline,RecentlyOpenedAccountRatio,0.004889215371399458,0.00037228043726149904,average_precision,Requires manual business review
+logistic_regression_baseline,Number of Accounts,0.002994015108205339,0.0005110670415728387,average_precision,Requires manual business review
+logistic_regression_baseline,InquiryIntensityBand,0.002392343356196458,0.0005355560787353572,average_precision,Requires manual business review
+logistic_regression_baseline,Employment Type,0.001482015100268963,0.0007334170286722155,average_precision,Income stability / employment profile signal
+logistic_regression_baseline,AccountsPerCreditHistoryMonth,0.0010121660080792071,0.0007885218577267442,average_precision,Requires manual business review
+logistic_regression_baseline,InquiryPerCreditHistoryMonth,0.0009484728269455456,0.00035306402798452436,average_precision,Requires manual business review
+logistic_regression_baseline,ActiveAccountRatio,0.000822525507007854,0.0011895084755474666,average_precision,Requires manual business review
+logistic_regression_baseline,Age,0.0006961364689927252,0.00043725483228607826,average_precision,Customer maturity / lifecycle signal
+logistic_regression_baseline,IsBureauExcluded,0.0005530430550120258,0.0006179490667615745,average_precision,Requires manual business review
+logistic_regression_baseline,DisbursementMonth,0.0005265834407601866,0.0003411027848589627,average_precision,Requires manual business review
+logistic_regression_baseline,DisbursementQuarter,0.00046661368308480443,0.00033498136383135104,average_precision,Requires manual business review
+logistic_regression_baseline,Number of Inquiries,0.0003793298096031017,7.912763322363512e-05,average_precision,Recent credit-seeking behavior
+logistic_regression_baseline,InstalmentToDisbursedRatio,0.00013535922471688,0.00019488380997589644,average_precision,Exposure size signal
+logistic_regression_baseline,InstalmentToDisbursedAmount,0.00013535922471688,0.00019488380997589644,average_precision,Exposure size signal
+logistic_regression_baseline,Loan To Value,7.516262203773882e-05,3.3745382350050495e-05,average_precision,Loan exposure relative to asset value
+logistic_regression_baseline,CurrentBalancePositiveAmount,2.02624922891248e-05,1.6834631176148976e-05,average_precision,Outstanding balance / leverage signal
+logistic_regression_baseline,HasNegativeCurrentBalance,2.02624922891248e-05,1.6834631176148976e-05,average_precision,Outstanding balance / leverage signal
+logistic_regression_baseline,Disbursed Amount,1.5277084047438107e-05,7.040783364650671e-06,average_precision,Exposure size signal
+logistic_regression_baseline,State,6.642322813477098e-06,1.192006170597546e-05,average_precision,Geographic / portfolio mix signal
+logistic_regression_baseline,DisbursementYear,0.0,0.0,average_precision,Requires manual business review
+logistic_regression_baseline,DaysSinceDisbursement,-1.521262780848076e-05,0.00011028379533365626,average_precision,Requires manual business review
+logistic_regression_baseline,IsVeryHighLTV,-1.7498596257659038e-05,5.925094928829637e-05,average_precision,Requires manual business review
+logistic_regression_baseline,BalanceToDisbursedRatio,-0.00011907990589139494,6.382146057853535e-05,average_precision,Outstanding balance / leverage signal
+logistic_regression_baseline,Legit LTV,-0.00013040836955245937,0.00011685838042198113,average_precision,Requires manual business review
+logistic_regression_baseline,Branch ID,-0.00013389979759960148,7.911569533669026e-05,average_precision,Requires manual business review
+logistic_regression_baseline,IsHighLTV,-0.00015487792325379334,0.0003468782234476239,average_precision,Requires manual business review
+logistic_regression_baseline,InquiryToAccountRatio,-0.00019310342453857655,0.00022754467950722058,average_precision,Requires manual business review
+logistic_regression_baseline,Instalment Amount,-0.0002368266759819826,0.0001777131433851847,average_precision,Repayment burden signal
+logistic_regression_baseline,RecentlyOpenedAccountsPerCreditHistoryMonth,-0.0006064056965485287,0.00042732116940454626,average_precision,Requires manual business review
+logistic_regression_baseline,Legit FICO Scores,-0.0006503454230359473,0.0008182435439397083,average_precision,Credit bureau quality / creditworthiness signal
+decision_tree_depth4,Legit FICO Scores,0.16006612020839134,0.004213126602119054,average_precision,Credit bureau quality / creditworthiness signal
+decision_tree_depth4,OverdueAccountRatio,0.12869046910813314,0.0009814329358553016,average_precision,Historical repayment stress / delinquency signal
+decision_tree_depth4,Current Balance Amount,0.06025886147944488,0.0045430459151696,average_precision,Outstanding balance / leverage signal
+decision_tree_depth4,FICO Score,0.013100749166770165,0.0007466794421216493,average_precision,Credit bureau quality / creditworthiness signal
+decision_tree_depth4,AccountsPerCreditHistoryMonth,0.007149938535783362,0.0007966999057631498,average_precision,Requires manual business review
+decision_tree_depth4,Instalment Amount,0.0029305974874224818,0.0003276816747427062,average_precision,Repayment burden signal
+decision_tree_depth4,ActiveAccountRatio,0.0005674487134684214,0.00013685341556831366,average_precision,Requires manual business review
+decision_tree_depth4,RecentlyOpenedAccountRatio,0.0003316870841863606,1.9405140141274228e-05,average_precision,Requires manual business review
+decision_tree_depth4,BalanceToDisbursedRatio,0.00018146067442427195,0.00010115581205382016,average_precision,Outstanding balance / leverage signal
+decision_tree_depth4,Average Account Age,0.00011047567861360852,0.00011639113766880957,average_precision,Customer maturity / lifecycle signal
+decision_tree_depth4,InstalmentToDisbursedRatio,0.0,0.0,average_precision,Exposure size signal
+decision_tree_depth4,HasNoActiveAccounts,0.0,0.0,average_precision,Requires manual business review
+decision_tree_depth4,CreditHistoryAgeBand,0.0,0.0,average_precision,Customer maturity / lifecycle signal
+decision_tree_depth4,Loan To Value,0.0,0.0,average_precision,Loan exposure relative to asset value
+decision_tree_depth4,HasZeroCurrentBalance,0.0,0.0,average_precision,Outstanding balance / leverage signal
+decision_tree_depth4,RecentlyOpenedAccountsPerCreditHistoryMonth,0.0,0.0,average_precision,Requires manual business review
+decision_tree_depth4,InquiryIntensityBand,0.0,0.0,average_precision,Requires manual business review
+decision_tree_depth4,InquiryPerCreditHistoryMonth,0.0,0.0,average_precision,Requires manual business review
+decision_tree_depth4,InquiryToAccountRatio,0.0,0.0,average_precision,Requires manual business review
+decision_tree_depth4,IsHighLTV,0.0,0.0,average_precision,Requires manual business review
+decision_tree_depth4,IsVeryHighLTV,0.0,0.0,average_precision,Requires manual business review
+decision_tree_depth4,Legit LTV,0.0,0.0,average_precision,Requires manual business review
+decision_tree_depth4,CurrentBalancePositiveAmount,0.0,0.0,average_precision,Outstanding balance / leverage signal
+decision_tree_depth4,FICO Rating,0.0,0.0,average_precision,Credit bureau quality / creditworthiness signal
+decision_tree_depth4,HasNegativeCurrentBalance,0.0,0.0,average_precision,Outstanding balance / leverage signal
+decision_tree_depth4,FICO Rating Ordinal,0.0,0.0,average_precision,Credit bureau quality / creditworthiness signal
+decision_tree_depth4,Age,0.0,0.0,average_precision,Customer maturity / lifecycle signal
+decision_tree_depth4,Employment Type,0.0,0.0,average_precision,Income stability / employment profile signal
+decision_tree_depth4,State,0.0,0.0,average_precision,Geographic / portfolio mix signal
+decision_tree_depth4,Number of Accounts,0.0,0.0,average_precision,Requires manual business review
+decision_tree_depth4,Number of Active Accounts,0.0,0.0,average_precision,Requires manual business review
+decision_tree_depth4,Number of Overdue Accounts,0.0,0.0,average_precision,Historical repayment stress / delinquency signal
+decision_tree_depth4,Disbursed Amount,0.0,0.0,average_precision,Exposure size signal
+decision_tree_depth4,Number of Accounts Opened Last 6 Months,0.0,0.0,average_precision,Requires manual business review
+decision_tree_depth4,Number of Inquiries,0.0,0.0,average_precision,Recent credit-seeking behavior
+decision_tree_depth4,DisbursementYear,0.0,0.0,average_precision,Requires manual business review
+decision_tree_depth4,DisbursementQuarter,0.0,0.0,average_precision,Requires manual business review
+decision_tree_depth4,DisbursementMonth,0.0,0.0,average_precision,Requires manual business review
+decision_tree_depth4,DaysSinceDisbursement,0.0,0.0,average_precision,Requires manual business review
+decision_tree_depth4,IsBureauExcluded,0.0,0.0,average_precision,Requires manual business review
+decision_tree_depth4,Branch ID,0.0,0.0,average_precision,Requires manual business review
+decision_tree_depth4,InstalmentToDisbursedAmount,0.0,0.0,average_precision,Exposure size signal
+random_forest_light,Legit FICO Scores,0.0456638900101803,0.006999175054156066,average_precision,Credit bureau quality / creditworthiness signal
+random_forest_light,OverdueAccountRatio,0.040169199307922086,0.0049234804272367235,average_precision,Historical repayment stress / delinquency signal
+random_forest_light,FICO Score,0.03334797331222703,0.007326439671863304,average_precision,Credit bureau quality / creditworthiness signal
+random_forest_light,Number of Overdue Accounts,0.032572772174638366,0.0033610510340131208,average_precision,Historical repayment stress / delinquency signal
+random_forest_light,Current Balance Amount,0.016571759181044476,0.0034667209825200327,average_precision,Outstanding balance / leverage signal
+random_forest_light,Disbursed Amount,0.012550744314553807,0.005603330948342644,average_precision,Exposure size signal
+random_forest_light,ActiveAccountRatio,0.011010268517260169,0.004346089543627927,average_precision,Requires manual business review
+random_forest_light,HasZeroCurrentBalance,0.010504769793373937,0.0034202960986363944,average_precision,Outstanding balance / leverage signal
+random_forest_light,Average Account Age,0.009956288858705054,0.0008912219202858018,average_precision,Customer maturity / lifecycle signal
+random_forest_light,AccountsPerCreditHistoryMonth,0.007911619376643263,0.001041301705169161,average_precision,Requires manual business review
+random_forest_light,FICO Rating Ordinal,0.007562095506027244,0.004785622558991021,average_precision,Credit bureau quality / creditworthiness signal
+random_forest_light,FICO Rating,0.007339785669334664,0.0035855504045291856,average_precision,Credit bureau quality / creditworthiness signal
+random_forest_light,Number of Active Accounts,0.0071595198346557035,0.0035416902216359888,average_precision,Requires manual business review
+random_forest_light,RecentlyOpenedAccountsPerCreditHistoryMonth,0.005184716714966941,0.0009199478010055704,average_precision,Requires manual business review
+random_forest_light,HasNoActiveAccounts,0.0036073387298888094,0.003405513155435131,average_precision,Requires manual business review
+random_forest_light,CreditHistoryAgeBand,0.003573486943318116,0.0006041001628282323,average_precision,Customer maturity / lifecycle signal
+random_forest_light,InstalmentToDisbursedAmount,0.0030004985273996976,0.000535857080404369,average_precision,Exposure size signal
+random_forest_light,InstalmentToDisbursedRatio,0.0021661696345784743,0.000502719235411652,average_precision,Exposure size signal
+random_forest_light,Number of Accounts Opened Last 6 Months,0.002093580151818464,0.0005214956956828484,average_precision,Requires manual business review
+random_forest_light,IsBureauExcluded,0.0019415178149030377,0.000847331279786799,average_precision,Requires manual business review
+random_forest_light,BalanceToDisbursedRatio,0.0017540968542147039,0.0019590539120603228,average_precision,Outstanding balance / leverage signal
+random_forest_light,RecentlyOpenedAccountRatio,0.0017234432302690062,0.0005217317559711783,average_precision,Requires manual business review
+random_forest_light,Instalment Amount,0.0010797275858415167,0.0027088780518054385,average_precision,Repayment burden signal
+random_forest_light,Number of Accounts,0.0006964486225960354,0.0009058889123837191,average_precision,Requires manual business review
+random_forest_light,InquiryPerCreditHistoryMonth,0.0005061986829439036,0.00013876000948073437,average_precision,Requires manual business review
+random_forest_light,State,0.0003622541750770036,0.00018707567237070204,average_precision,Geographic / portfolio mix signal
+random_forest_light,Legit LTV,0.0002959720675210553,8.756291775870631e-05,average_precision,Requires manual business review
+random_forest_light,DisbursementMonth,0.000184639849792001,6.728604405738501e-05,average_precision,Requires manual business review
+random_forest_light,Branch ID,0.00017364422528289846,3.837331032381914e-05,average_precision,Requires manual business review
+random_forest_light,Age,0.00016749850008066503,0.00014907526013917342,average_precision,Customer maturity / lifecycle signal
+random_forest_light,InquiryToAccountRatio,0.0001590125969417322,9.793737320125895e-05,average_precision,Requires manual business review
+random_forest_light,Loan To Value,0.00012633265475414657,0.0001529931690678262,average_precision,Loan exposure relative to asset value
+random_forest_light,DaysSinceDisbursement,0.0001227635488669554,0.000141993704491529,average_precision,Requires manual business review
+random_forest_light,InquiryIntensityBand,0.00012079738492198899,6.171269409738189e-05,average_precision,Requires manual business review
+random_forest_light,Number of Inquiries,0.00010235942129586118,2.4995148432514266e-05,average_precision,Recent credit-seeking behavior
+random_forest_light,Employment Type,5.5918106894203845e-05,4.295320291002333e-05,average_precision,Income stability / employment profile signal
+random_forest_light,IsHighLTV,3.419115950593632e-05,7.068323879994256e-05,average_precision,Requires manual business review
+random_forest_light,CurrentBalancePositiveAmount,0.0,0.0,average_precision,Outstanding balance / leverage signal
+random_forest_light,HasNegativeCurrentBalance,0.0,0.0,average_precision,Outstanding balance / leverage signal
+random_forest_light,DisbursementYear,0.0,0.0,average_precision,Requires manual business review
+random_forest_light,IsVeryHighLTV,-7.231803679452753e-07,7.038688374242685e-07,average_precision,Requires manual business review
+random_forest_light,DisbursementQuarter,-1.8292697787436475e-05,3.829519533059589e-05,average_precision,Requires manual business review
+gradient_boosting_light,Legit FICO Scores,0.16967837673937491,0.00894910947558268,average_precision,Credit bureau quality / creditworthiness signal
+gradient_boosting_light,OverdueAccountRatio,0.1268843773648578,0.006206989347011936,average_precision,Historical repayment stress / delinquency signal
+gradient_boosting_light,Current Balance Amount,0.023384169618571572,0.003925710667824714,average_precision,Outstanding balance / leverage signal
+gradient_boosting_light,Average Account Age,0.01623709087255687,0.000844937490725049,average_precision,Customer maturity / lifecycle signal
+gradient_boosting_light,AccountsPerCreditHistoryMonth,0.015042956012939946,0.0020292430876914227,average_precision,Requires manual business review
+gradient_boosting_light,Disbursed Amount,0.010863573385943482,0.004708682070714524,average_precision,Exposure size signal
+gradient_boosting_light,Instalment Amount,0.009616236963989033,0.001573382866103849,average_precision,Repayment burden signal
+gradient_boosting_light,Number of Overdue Accounts,0.008992738176426629,0.00047901654220013594,average_precision,Historical repayment stress / delinquency signal
+gradient_boosting_light,ActiveAccountRatio,0.008564622147194511,0.0030521458594625016,average_precision,Requires manual business review
+gradient_boosting_light,FICO Score,0.008466776229869378,0.0023383679561548004,average_precision,Credit bureau quality / creditworthiness signal
+gradient_boosting_light,Number of Active Accounts,0.004757007073343122,0.003746763606149114,average_precision,Requires manual business review
+gradient_boosting_light,RecentlyOpenedAccountsPerCreditHistoryMonth,0.0030976729095436584,0.00144530199650672,average_precision,Requires manual business review
+gradient_boosting_light,HasZeroCurrentBalance,0.002488691465826287,0.0019782563281227185,average_precision,Outstanding balance / leverage signal
+gradient_boosting_light,BalanceToDisbursedRatio,0.001810687052338955,0.0010784974399253057,average_precision,Outstanding balance / leverage signal
+gradient_boosting_light,InstalmentToDisbursedAmount,0.0015659890968076073,0.00025491415279748427,average_precision,Exposure size signal
+gradient_boosting_light,RecentlyOpenedAccountRatio,0.0014174032290775295,0.0007847785444228842,average_precision,Requires manual business review
+gradient_boosting_light,InquiryPerCreditHistoryMonth,0.0013520606900547794,0.00028808513487966147,average_precision,Requires manual business review
+gradient_boosting_light,CreditHistoryAgeBand,0.0011468201612234719,0.0004144738937004409,average_precision,Customer maturity / lifecycle signal
+gradient_boosting_light,InstalmentToDisbursedRatio,0.0006806367859613527,0.00022111015640642893,average_precision,Exposure size signal
+gradient_boosting_light,Legit LTV,0.000649991815243589,0.0007754765226317429,average_precision,Requires manual business review
+gradient_boosting_light,Employment Type,0.00031301584513856453,0.000400794002375697,average_precision,Income stability / employment profile signal
+gradient_boosting_light,Number of Accounts Opened Last 6 Months,0.00012786147536674174,8.496234370480118e-05,average_precision,Requires manual business review
+gradient_boosting_light,FICO Rating,0.00011354014993287808,0.000695545658698839,average_precision,Credit bureau quality / creditworthiness signal
+gradient_boosting_light,InquiryToAccountRatio,8.461436432201097e-05,0.00015545366033566349,average_precision,Requires manual business review
+gradient_boosting_light,DaysSinceDisbursement,7.205526217710645e-05,3.408294556178259e-05,average_precision,Requires manual business review
+gradient_boosting_light,Number of Accounts,2.236417471646046e-05,4.858506496765367e-05,average_precision,Requires manual business review
+gradient_boosting_light,IsBureauExcluded,1.3562077139517293e-05,0.0002049686869417324,average_precision,Requires manual business review
+gradient_boosting_light,Number of Inquiries,2.2856267299475873e-06,3.879441234807007e-06,average_precision,Recent credit-seeking behavior
+gradient_boosting_light,HasNegativeCurrentBalance,0.0,0.0,average_precision,Outstanding balance / leverage signal
+gradient_boosting_light,IsVeryHighLTV,0.0,0.0,average_precision,Requires manual business review
+gradient_boosting_light,IsHighLTV,0.0,0.0,average_precision,Requires manual business review
+gradient_boosting_light,InquiryIntensityBand,0.0,0.0,average_precision,Requires manual business review
+gradient_boosting_light,DisbursementYear,0.0,0.0,average_precision,Requires manual business review
+gradient_boosting_light,DisbursementQuarter,0.0,0.0,average_precision,Requires manual business review
+gradient_boosting_light,DisbursementMonth,0.0,0.0,average_precision,Requires manual business review
+gradient_boosting_light,HasNoActiveAccounts,0.0,0.0,average_precision,Requires manual business review
+gradient_boosting_light,CurrentBalancePositiveAmount,0.0,0.0,average_precision,Outstanding balance / leverage signal
+gradient_boosting_light,FICO Rating Ordinal,-5.675761878420893e-06,9.182327425339372e-06,average_precision,Credit bureau quality / creditworthiness signal
+gradient_boosting_light,Age,-0.00013776953093427302,0.0005943797064306576,average_precision,Customer maturity / lifecycle signal
+gradient_boosting_light,Branch ID,-0.00016845939880227867,5.836787543019951e-05,average_precision,Requires manual business review
+gradient_boosting_light,Loan To Value,-0.0003709906707402899,0.0006412327098940479,average_precision,Loan exposure relative to asset value
+gradient_boosting_light,State,-0.0009373050472123001,0.0010229932572871805,average_precision,Geographic / portfolio mix signal
