@@ -89,6 +89,62 @@ class FrequencyEncoder(BaseEstimator, TransformerMixin):
         return np.vstack(encoded_columns).T
     
 
+class NumericOutlierCapper(BaseEstimator, TransformerMixin):
+    """
+    Cap numeric features at training quantiles before scaling, which prevents extreme values from 
+    dominating distance-based clustering 
+    """
+    def __init__(
+            self,
+            lower_quantile: float = 0.01,
+            upper_quantile: float = 0.99
+    ) -> None:
+        # attributes
+        self.lower_quantile = lower_quantile
+        self.upper_quantile = upper_quantile
+    
+    def fit(
+            self,
+            X,
+            y = None
+    ):
+        """ Fit NumericOutlierCapper to learn extreme values for each column """
+        X_array = np.asarray(
+            X,
+            dtype = float
+        )
+
+        self.lower_bounds_ = np.nanquantile(
+            X_array,
+            q = self.lower_quantile,
+            axis = 0
+        )
+
+        self.upper_bounds_ = np.nanquantile(
+            X_array,
+            q = self.upper_quantile,
+            axis = 0
+        )
+
+        return self
+    
+    def transform(
+            self,
+            X
+    ):
+        """ Apply learned numeric feature capping at extreme values"""
+        X_array = np.asarray(
+            X,
+            dtype = float
+        )
+
+        return np.clip(
+            X_array,
+            self.lower_bounds_,
+            self.upper_bounds_
+        )
+
+
 class ClusteringPreprocessingBuilder:
     """ 
     Build preprocessing pipeline for unsupervised clustering
@@ -238,6 +294,10 @@ class ClusteringPreprocessingBuilder:
         numeric_pipeline = Pipeline(
             steps = [
                 ('imputer', SimpleImputer(strategy = 'median')),
+                ('outlier_capper', NumericOutlierCapper(
+                    lower_quantile = 0.01,
+                    upper_quantile = 0.99
+                )),
                 ('scaler', RobustScaler())
             ]
         )

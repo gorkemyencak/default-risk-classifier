@@ -1,5 +1,8 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+
+from pathlib import Path
 
 from sklearn.metrics import (
     calinski_harabasz_score,
@@ -222,6 +225,33 @@ class ClusteringEvaluator:
             'min_cluster_count': min_cluster_count,
             'min_cluster_share': min_cluster_share
         }
+    
+    @staticmethod
+    def _filter_valid_metrics(
+        metrics_df: pd.DataFrame,
+        require_valid: bool = True
+    ) -> pd.DataFrame:
+        """ Filter clustering metrics dataframe to plot only valid clustering solutions """
+        metrics_df = metrics_df.copy()
+
+        if require_valid and 'is_valid_clustering' in metrics_df.columns:
+            metrics_df = (
+                metrics_df
+                .query('is_valid_clustering == True')
+            )
+        
+        return metrics_df
+    
+    @staticmethod
+    def _prepare_plot_directory(
+        save_path: Path | None
+    ) -> None:
+        """ Create parent directory when saving a plot """
+        if save_path is not None:
+            save_path.parent.mkdir(
+                parents = True,
+                exist_ok = True
+            )
 
 
     # clustering evaluator engine
@@ -270,16 +300,46 @@ class ClusteringEvaluator:
             
             return result
         
+        # check small clusters
+        has_small_cluster = (
+            cluster_size_summary['min_cluster_count'] < self.min_cluster_size
+            or cluster_size_summary['min_cluster_share'] < self.min_cluster_share
+        )
+        
+        # if cluster labels are assigned properly
+        if has_small_cluster:
+            result['is_valid_clustering'] = False
+            result['evaluation_note'] = (
+                "Invalid clustering solution, contains a small cluster: "
+                f"min_cluster_count={cluster_size_summary['min_cluster_count']}, "
+                f"min_cluster_share={cluster_size_summary['min_cluster_share']:.4f}"
+            )
+        else:
+            result['is_valid_clustering'] = True
+            result['evaluation_note'] = 'Valid clustering solution'
+
+        # dominant cluster check
+        max_cluster_share = (
+            max(cluster_size_summary['cluster_sizes'].values())
+            / n_observations
+        )
+
+        if max_cluster_share > 0.85:
+            result['is_valid_clustering'] = False
+            result['evaluation_note'] = (
+                "Invalid clustering solution, one cluster dominates the portfolio. "
+                f"max_cluster_share={max_cluster_share:.4f}"
+            )
+
+
+        """
         # check degenerate solution
         if cluster_size_summary['min_cluster_count'] < self.min_cluster_size:
             result['evaluation_note'] = (
-                f'Degenerate clustering solution: smallest cluster share is only {cluster_size_summary['min_cluster_share']:.4f}'
-            )
-        
-        # if cluster labels are assigned properly
-        result['is_valid_clustering'] = True
-        result['evaluation_note'] = 'Valid clustering solution'
+                f"Degenerate clustering solution: smallest cluster share is only {cluster_size_summary['min_cluster_share']:.4f}"
+            )"""
 
+        # compute clustering scores
         result['davies_bouldin_score'] = davies_bouldin_score(
             X = X_transformed,
             labels = labels
@@ -316,3 +376,242 @@ class ClusteringEvaluator:
             )
             .reset_index(drop = True)
         )
+    
+
+    # plot methods
+    def plot_metric_by_model(
+            self,
+            metrics_df: pd.DataFrame,
+            metric: str,
+            title: str,
+            ylabel: str,
+            higher_is_better: bool = True,
+            require_valid: bool = True,
+            save_path: Path | None = None,
+            figsize: tuple[int, int] = (10, 5)
+    ):
+        """ A generic method for plotting clustering metrics by model and number of clusters """
+        # filter valid metrics
+        plot_df = self._filter_valid_metrics(
+            metrics_df = metrics_df,
+            require_valid = require_valid
+        )
+
+        # sanity check
+        if metric not in plot_df.columns:
+            raise ValueError(f'{metric} not found in metrics dataframe')
+        
+        # valid observations
+        plot_df = plot_df.dropna(
+            subset = [metric]
+        )
+
+        # sanity check
+        if plot_df.empty:
+            raise ValueError(f'No valid observations found for metric: {metric}')
+        
+        fig, ax = plt.subplots(
+            figsize = figsize
+        )
+
+        # extract model family for groupby operation
+        plot_df['model_family'] = (
+            plot_df['model']
+            .str
+            .replace(
+                r"_k\d+$", 
+                "", 
+                regex = True
+            )
+        )
+
+        for model_name, model_df in plot_df.groupby('model_family'):
+            
+            model_df = model_df.sort_values('n_clusters')
+
+            ax.plot(
+                model_df['n_clusters'],
+                model_df[metric],
+                marker = 'o',
+                label = model_name
+            )
+
+        direction_note = 'higher is better' if higher_is_better else 'lower is better'
+
+        ax.set_title(
+            f'{title} - {direction_note}',
+            fontweight = 'bold'
+        )
+        ax.set_xlabel('Number of Clusters')
+        ax.set_ylabel(ylabel)
+        ax.legend(
+            bbox_to_anchor = (1.05, 1),
+            loc = 'upper left'
+        )
+        ax.grid(alpha = 0.3)
+
+        fig.tight_layout()
+
+        self._prepare_plot_directory(save_path = save_path)
+
+        if save_path is not None:
+            fig.savefig(
+                save_path,
+                dpi = 300,
+                bbox_inches = 'tight'
+            )
+        
+        return fig, ax
+    
+    def plot_silhouette_score(
+            self,
+            metrics_df: pd.DataFrame,
+            require_valid: bool = True,
+            save_path: Path | None = None,
+            figsize: tuple[int, int] = (10, 5) 
+    ):
+        """ 
+        Plot silhouette score by model and number of clusters 
+        
+        Higher silhouette score indicates better seperated and more compact clusters
+        """
+        return self.plot_metric_by_model(
+            metrics_df = metrics_df,
+            metric = 'silhouette_score',
+            title = 'Silhouette Score by Model and Cluster Count',
+            ylabel = 'Silhouette score',
+            higher_is_better = True,
+            require_valid = require_valid,
+            save_path = save_path,
+            figsize = figsize
+        )
+    
+    def plot_davies_bouldin_score(
+            self,
+            metrics_df: pd.DataFrame,
+            require_valid: bool = True,
+            save_path: Path | None = None,
+            figsize: tuple[int, int] = (10, 5)
+    ):
+        """ 
+        Plot Davies-Bouldin score by model and number of clusters
+        
+        Lower Davies-Bouldin score generally indicates better clustering seperation
+        """
+        return self.plot_metric_by_model(
+            metrics_df = metrics_df,
+            metric = 'davies_bouldin_score',
+            title = 'Davies-Bouldin Score by Model and Cluster Count',
+            ylabel = 'Davies-Bouldin score',
+            higher_is_better = False,
+            require_valid = require_valid,
+            save_path = save_path,
+            figsize = figsize
+        )
+    
+    def plot_calinski_harabasz_score(
+            self,
+            metrics_df: pd.DataFrame,
+            require_valid: bool = True,
+            save_path: Path | None = None,
+            figsize: tuple[int, int] = (10, 5)
+    ):
+        """
+        Plot Calinski-Harabasz score by model and number of clusters
+
+        Higher Calinski-Harabasz score generally indicates denser and better seperated clusters
+        """
+        return self.plot_metric_by_model(
+            metrics_df = metrics_df,
+            metric = 'calinski_harabasz_score',
+            title = 'Calinski-Harabasz Score by Model and Cluster Count',
+            ylabel = 'Calinski-Harabasz score',
+            higher_is_better = True,
+            require_valid = require_valid,
+            save_path = save_path,
+            figsize = figsize
+        )
+    
+    def plot_kmeans_inertia_elbow(
+            self,
+            metrics_df: pd.DataFrame,
+            require_valid: bool = True,
+            save_path: Path | None = None,
+            figsize: tuple[int, int] = (10, 5)
+    ):
+        """ Plot inertia elbow curve for KMeans clustering models """
+        # filter valid metrics
+        plot_df = self._filter_valid_metrics(
+            metrics_df = metrics_df,
+            require_valid = require_valid
+        )
+
+        # sanity check
+        if 'inertia' not in plot_df.columns:
+            raise ValueError('inertia not found in metrics dataframe')
+        
+        # valid observations
+        plot_df = plot_df.dropna(
+            subset = ['inertia']
+        )
+
+        # sanity check for KMeans-style clusterers
+        if plot_df.empty:
+            raise ValueError('No inertia values found!')
+        
+        fig, ax = plt.subplots(
+            figsize = figsize
+        )
+
+        # extract model family for groupby operation
+        plot_df['model_family'] = (
+            plot_df['model']
+            .str
+            .replace(
+                r"_k\d+$", 
+                "", 
+                regex = True
+            )
+        )
+
+        for model_name, model_df in plot_df.groupby('model_family'):
+
+            model_df = model_df.sort_values('n_clusters')
+
+            ax.plot(
+                model_df['n_clusters'],
+                model_df['inertia'],
+                marker = 'o',
+                label = model_name
+            )
+
+        ax.set_title(
+            'KMeans Inertia Elbow Plot (lower is better)',
+            fontweight = 'bold'
+        )
+        ax.set_xlabel('Number of clusters')
+        ax.set_ylabel('Inertia')
+        ax.legend(
+            bbox_to_anchor = (1.05, 1),
+            loc = 'upper left'
+        )
+        ax.grid(alpha = 0.3)
+
+        fig.tight_layout()
+
+        self._prepare_plot_directory(save_path = save_path)
+
+        if save_path is not None:
+            fig.savefig(
+                save_path,
+                dpi = 300,
+                bbox_inches = 'tight'
+            )
+        
+        return fig, ax
+
+
+        
+
+    
+

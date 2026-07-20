@@ -39,12 +39,19 @@ class FeatureEngineeringEngine:
     def _divide_series(
             self,
             numerator: pd.Series,
-            denominator: pd.Series
+            denominator: pd.Series,
+            min_denominator: float = 0.0
     ) -> pd.Series:
-        """ Dividing two pandas series, returning NaN when the denominator is missing or NaN """
+        """ Dividing two pandas series, returning NaN when the denominator is missing or NaN, or too small """
+        # valid denominator
+        valid_denominator = (
+            denominator.notna()
+            & (denominator.abs() > min_denominator)
+        )
+        
         # safe division
         division = np.where(
-            (denominator != 0) & (denominator.notna()),
+            valid_denominator,
             numerator / denominator,
             np.nan
         )
@@ -181,7 +188,7 @@ class FeatureEngineeringEngine:
 
         df['CurrentBalancePositiveAmount'] = np.where(
             df['Current Balance Amount'] >= 0,
-            1,
+            df['Current Balance Amount'],
             0
         )
 
@@ -195,7 +202,8 @@ class FeatureEngineeringEngine:
         ):
             df['InstalmentToDisbursedRatio'] = self._divide_series(
                 numerator = df['Instalment Amount'],
-                denominator = df['Disbursed Amount']
+                denominator = df['Disbursed Amount'],
+                min_denominator = 1000  
             )
 
         if self._check_columns(
@@ -435,19 +443,6 @@ class FeatureEngineeringEngine:
             df['Loan To Value'],
             np.nan
         )
-
-        # temporal feature
-        if self._check_columns(
-            df = df,
-            columns = {
-                'Instalment Amount',
-                'Disbursed Amount'
-            }
-        ):
-            df['InstalmentToDisbursedAmount'] = self._divide_series(
-                numerator = df['Instalment Amount'],
-                denominator = df['Disbursed Amount']
-            )
         
         return df
     
