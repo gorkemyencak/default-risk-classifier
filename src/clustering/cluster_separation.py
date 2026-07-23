@@ -8,9 +8,9 @@ from sklearn.impute import SimpleImputer
 
 from config import METRICS_DIR
 
-class NumericClusterSeperationAnalyzer:
+class NumericClusterSeparationAnalyzer:
     """ 
-    NumericClusterSeperationAnalyzer class analyzes which numeric features explain seperation between clusters 
+    NumericClusterSeparationAnalyzer class analyzes which numeric features explain separation between clusters 
     
     This class is a pre-interpretation diagnostic layer, and is applied after assinging the cluster labels deploying the clustering models
 
@@ -130,7 +130,7 @@ class NumericClusterSeperationAnalyzer:
         """
         Calculate eta-squared for one feature
 
-        If cluster membership explains a higher feature variation, then we can safely claim that such a feature is a strong cluster-seperation feature  
+        If cluster membership explains a higher feature variation, then we can safely claim that such a feature is a strong cluster-separation feature  
 
         Formula:
             η^{2} = between_cluster_sum_of_squares / total_sum_of_squares
@@ -220,7 +220,7 @@ class NumericClusterSeperationAnalyzer:
             'max_abs_standardized_cluster_mean': max_abs_standardized_cluster_mean
         }
     
-    # cluster seperation engine
+    # cluster separation engine
     def analyze(
             self,
             df: pd.DataFrame,
@@ -228,9 +228,9 @@ class NumericClusterSeperationAnalyzer:
             exclude_columns: list[str] | None = None
     ) -> pd.DataFrame:
         """ 
-        Calculate numeric cluster-seperation importance for one clustering solution 
+        Calculate numeric cluster-separation importance for one clustering solution 
         
-        higher f-score -> stronger seperation across clusters
+        higher f-score -> stronger separation across clusters
         lower p-value -> stronger statistical evidence of different cluster means
         """
         # prepare aligned labels
@@ -297,16 +297,16 @@ class NumericClusterSeperationAnalyzer:
 
             results.append(result)
         
-        seperation_df = pd.DataFrame(results)
+        separation_df = pd.DataFrame(results)
 
-        seperation_df = seperation_df.merge(
+        separation_df = separation_df.merge(
             anova_df,
             on = 'feature',
             how = 'left'
         )
 
         return (
-            seperation_df
+            separation_df
             .sort_values(
                 by = [
                     'eta_squared',
@@ -326,7 +326,7 @@ class NumericClusterSeperationAnalyzer:
             exclude_columns: list[str] | None = None
     ) -> pd.DataFrame:
         """ 
-        Calculate numeric cluster-seperation importance for multiple clustering solutions, 
+        Calculate numeric cluster-separation importance for multiple clustering solutions, 
         and return a single combined interpretation table
         """
         # check whether a list of model_names are provided, and analyze all clustering models if model_names are not passed
@@ -344,7 +344,7 @@ class NumericClusterSeperationAnalyzer:
             if model_name not in cluster_labels.columns:
                 raise ValueError(f'{model_name} not found in cluster_labels columns, please train the {model_name} first!')
             
-            # compute numeric cluster-seperation importance of a given model_name 
+            # compute numeric cluster-separation importance of a given model_name 
             model_result = self.analyze(
                 df = df,
                 labels = cluster_labels[model_name],
@@ -363,21 +363,21 @@ class NumericClusterSeperationAnalyzer:
     # pre-interpretation feature selection
     @staticmethod
     def get_top_features(
-        seperation_df: pd.DataFrame,
+        separation_df: pd.DataFrame,
         top_n: int = 15,
         model_name: str | None = None
     ) -> pd.DataFrame:
         """ 
-        Return top cluster-seperating features filtered by user-specified model_name 
+        Return top cluster-separating features filtered by user-specified model_name 
         
         Top features are sorted in the following order:
             1) η^{2} -> Higher eta_squared implies that cluster labels explain more of this feature's variance
-            2) Anova F-Score -> Higher anova f-score implies that cluster means are more seperated relative to within-cluster variation
+            2) Anova F-Score -> Higher anova f-score implies that cluster means are more separated relative to within-cluster variation
             3) Standardized Spread -> implies that at least one cluster mean is far from global average
         """
-        df = seperation_df.copy()
+        df = separation_df.copy()
 
-        # filter the seperation_df by model_name
+        # filter the separation_df by model_name
         if model_name is not None:
             df = df.query('model == @model_name') 
         
@@ -397,7 +397,7 @@ class NumericClusterSeperationAnalyzer:
     
     @staticmethod
     def select_profile_features(
-        seperation_df: pd.DataFrame,
+        separation_df: pd.DataFrame,
         domain_features: list[str] | None = None,
         top_n_data_driven: int = 15,
         model_name: str | None = None
@@ -408,9 +408,9 @@ class NumericClusterSeperationAnalyzer:
             domain_features or []
         )
 
-        # statistical cluster-seperation importances
-        top_features_df = NumericClusterSeperationAnalyzer.get_top_features(
-            seperation_df = seperation_df,
+        # statistical cluster-separation importances
+        top_features_df = NumericClusterSeparationAnalyzer.get_top_features(
+            separation_df = separation_df,
             top_n = top_n_data_driven,
             model_name = model_name
         )
@@ -426,18 +426,18 @@ class NumericClusterSeperationAnalyzer:
 
         return combined_features
     
-    def save_seperation_table(
+    def save_separation_table(
         self,
-        seperation_df: pd.DataFrame,
-        file_name: str = 'numeric_cluster_seperation_importance.csv'
+        separation_df: pd.DataFrame,
+        file_name: str = 'numeric_cluster_separation_importance.csv'
     ) -> None:
-        """ Save cluster-seperation importance table locally """
+        """ Save cluster-separation importance table locally """
         self.metrics_dir.mkdir(
             parents = True,
             exist_ok = True
         )
 
-        seperation_df.to_csv(
+        separation_df.to_csv(
             self.metrics_dir / file_name,
             index = False
         )
